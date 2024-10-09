@@ -25,5 +25,6 @@ def main(pdf_path: str) -> str:
     print("Result step 3:", result)
 
 if __name__ == "__main__":
-    pdf_path = "/Users/nielsrogge/Downloads/2406.02842v2.pdf"
+    # pdf_path = "/Users/nielsrogge/Downloads/2406.02842v2.pdf"
+    pdf_path = "/Users/nielsrogge/Downloads/2410.01912v1.pdf"
     result = main(pdf_path)

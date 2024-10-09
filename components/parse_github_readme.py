@@ -1,4 +1,5 @@
-import typing_extensions as typing
+from ast import literal_eval
+import re
 import os
 import requests
 
@@ -20,6 +21,19 @@ def get_readme(url: str) -> str:
     return response.text
 
 
+def parse_json_like_string(s):
+    # Use regex to extract content between ```json and ```
+    pattern = r'```json\s*(.*?)\s*```'
+    match = re.search(pattern, s, re.DOTALL)
+    
+    if match:
+        content = match.group(1)
+        # Use ast.literal_eval to safely evaluate the string as a Python literal
+        return literal_eval(content)
+    else:
+        raise ValueError("No JSON-like content found between ```json and ``` markers")
+
+
 def parse_readme(url: str) -> str:
     markdown_content = get_readme(url)
 
@@ -32,5 +46,11 @@ def parse_readme(url: str) -> str:
         prompt = file.read()
 
     response = chat.send_message({"role": "user", "parts": [prompt, markdown_content]})
+
+    print("Raw response:", response.text)
+
+    # parse ```json from response
+
+    response = parse_json_like_string(response.text)
     
-    return response.text
+    return response

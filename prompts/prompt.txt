@@ -5,7 +5,7 @@ The Github URL is the URL of the repository where the code is hosted, and always
 If the URL does not include github.com, then it is not an appropriate Github URL.
 Some papers also include a project page, which is a web page that provides more information about the paper.
 Project pages often, but not always, include github.io in their URL.
-In case the Github or project page URL is not present, write an empty string '' for the respective URL.
+In case the Github or project page URL is not present, write an empty '' for the respective URL.
 
 Use this JSON schema:
 
