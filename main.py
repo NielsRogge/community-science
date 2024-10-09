@@ -1,47 +1,29 @@
-import google.generativeai as genai
-import os
+from components.parse_pdf import get_project_github_urls
+from components.parse_project_page import search_github_url_within_project_url
+from components.parse_github_readme import parse_readme
 
-from parse_pdf import extract_first_two_pages
 
+def main(pdf_path: str) -> str:
 
-genai.configure(api_key=os.environ["API_KEY"])
+    # step 1: get Github and project page URL from first 2 pages of PDF
+    result = get_project_github_urls(pdf_path)
 
-# read prompt from txt file
-with open("prompt.txt", "r") as file:
-    prompt = file.read()
+    print("Result step 1:", result)
 
-# add few-shots
-sample_pdf_1  = genai.upload_file("/Users/nielsrogge/Downloads/2409.18313v3.pdf")
-response_1 = """
-```json
-{'project_page_url': 'https://quanting-xie.github.io/Embodied-RAG-web/', 'github_url': ''}
-```
-"""
+    # step 2: if Github URL is not found, search for it in the project page
+    if result["github_url"] == "" and result["project_page_url"] != "":
+        project_page_url = result["project_page_url"]
+        github_url = search_github_url_within_project_url(project_page_url)["github_url"]
+        result["github_url"] = github_url
 
-sample_pdf_2 = genai.upload_file("/Users/nielsrogge/Downloads/2410.00337v1.pdf")
-response_2 = """
-```json
-{'project_page_url': 'https://len-li.github.io/syntheocc-web/', 'github_url': ''}
-```
-"""
+    print("Result step 2:", result)
 
-model = genai.GenerativeModel("gemini-1.5-flash-8b")
+    # step 3: if Github URL is present, parse the README
+    if result["github_url"] != "":
+        result = parse_readme(result["github_url"])
 
-chat = model.start_chat(
-    history=[
-        {"role": "user", "parts": [prompt, sample_pdf_1]},
-        {"role": "model", "parts": response_1},
-        {"role": "user", "parts": [prompt, sample_pdf_2]},
-        {"role": "model", "parts": response_2},
-    ]
-)
+    print("Result step 3:", result)
 
-# Example usage
-input_pdf = "/Users/nielsrogge/Downloads/2410.02115v2.pdf"
-sample_pdf_3 = "output.pdf"
-extract_first_two_pages(input_pdf, sample_pdf_3)
-
-sample_pdf_3 = genai.upload_file(sample_pdf_3)
-
-response = chat.send_message({"role": "user", "parts": [prompt, sample_pdf_3]})
-print(response.text)
+if __name__ == "__main__":
+    pdf_path = "/Users/nielsrogge/Downloads/2406.02842v2.pdf"
+    result = main(pdf_path)
