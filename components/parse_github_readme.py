@@ -2,6 +2,8 @@ from ast import literal_eval
 import re
 import os
 import requests
+import enum
+import typing_extensions as typing
 
 import google.generativeai as genai
 
@@ -52,5 +54,8 @@ def parse_readme(url: str) -> str:
     # parse ```json from response
 
     response = parse_json_like_string(response.text)
+    
+    # parse as dict
+    # response = literal_eval(response.text)
     
     return response
